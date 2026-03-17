@@ -11,14 +11,23 @@ const client = new line.Client(config);
 
 app.post('/callback', line.middleware(config), (req, res) => {
   Promise.all(req.body.events.map(event => {
-    if (event.type !== 'message' || event.message.type !== 'text') return Promise.resolve(null);
+    if (event.type !== 'message' || event.message.type !== 'text') {
+      return Promise.resolve(null);
+    }
+    // ここで返信
     return client.replyMessage(event.replyToken, {
       type: 'text',
-      text: `あなたの送ったメッセージ: ${event.message.text}`
+      text: `メッセージを受け取りました: ${event.message.text}`
     });
   }))
   .then(result => res.json(result))
-  .catch(err => { console.error(err); res.status(500).end(); });
+  .catch(err => {
+    console.error('Error details:', err); // 詳細なエラーを出す
+    res.status(500).end();
+  });
 });
 
-app.listen(process.env.PORT || 8080);
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
